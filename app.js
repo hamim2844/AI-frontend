@@ -2,6 +2,8 @@ const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user-input");
 let chatHistory = [];
 
+const apiUrl = "https://ai-exeu.onrender.com/api/ask"; // <-- replace this with your actual Render URL
+
 userInput.addEventListener("keydown", function(e) {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -25,7 +27,7 @@ async function sendMessage() {
   chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
-    const response = await fetch("/api/ask", {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -52,10 +54,10 @@ Always explain answers clearly, kindly, and behave frankly with everyone.
     });
 
     const data = await response.json();
-    // Remove typing indicator
     const typingDiv = document.getElementById("typing-indicator");
     if (typingDiv) typingDiv.remove();
-    const assistantReply = data.choices?.[0]?.message?.content || "Sorry, I couldn't process that.";
+
+    const assistantReply = data.reply || data.choices?.[0]?.message?.content || "Sorry, I couldn't process that.";
     appendMessage("assistant", assistantReply);
 
   } catch (error) {
@@ -71,10 +73,8 @@ function appendMessage(sender, text) {
   messageEl.classList.add("message", sender);
   messageEl.textContent = text;
   chatBox.appendChild(messageEl);
-  // Force reflow for animation
   void messageEl.offsetWidth;
   messageEl.style.animation = "messageIn 0.5s cubic-bezier(.23,1.01,.32,1) forwards";
-  // Optional: pulse effect
   messageEl.animate([
     { boxShadow: '0 0 0 0 #6cd4ff44' },
     { boxShadow: '0 0 0 8px #6cd4ff00' }
